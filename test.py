@@ -4,6 +4,7 @@ import dearpygui.dearpygui as dpg
 
 import subprocess
 import pyautogui
+import pygetwindow
 import time
 
 #############################################################################
@@ -19,30 +20,54 @@ time.sleep(5)
 #pyautogui.press('A')
 
 ##############################################################################
-list_program = [['блокнот',     'notepad.exe'],
-                ['календарь',   ['start', 'ms-cald:']],
-                ['браузер',     ["start", "opera.exe"]]]
+list_action_opened = ['открой',
+                      'открыть',
+                      'открывай']
 
-def get_path_from_program(program):
+
+
+list_program = [['блокнот',     'C:\\Windows\\System32\\notepad.exe'],
+                ['калькулятор', ''],
+                ['браузер',     'C:\\Users\\ASUS\\AppData\\Local\\Programs\\Opera\\launcher.exe']]
+
+def get_path_from_program(program: list) -> (list[str] | str):
     return program[1]
 
-def find_words_right_of(target_word, input_string, num_words=1):
-    words = input_string.split()
-    index = words.index(target_word) if target_word in words else -1
+def find_words_right_of(target_words: (list | tuple), input_string: str, num_words: int = 1) -> (list[str] | str | None):
+    words = input_string.lower().split()
+    print(f'{words=}')
+    index = -1
+    for target_word in target_words:
+        if target_word in words:
+            index = words.index(target_word) 
+            print(f'{index=}')
+    print(f'{index=}')
+    print(f'{num_words=}')
+    print('index + num_words = ' + str(index + num_words))
+    print('len(words) = ' + str(len(words)))
 
-    if index != -1 and index + num_words < len(words):
-        return words[index + 1 : index + num_words + 1]
+    if index != -1 and index + num_words <= len(words):
+        return_words = words[index + 1 : index + num_words + 1]
+        print(f'{return_words=}')
+        if len(return_words) == 1:
+            return return_words[0] 
+        else:
+            return return_words
     else:
         return None
 
-def parse_and_work(text):
-    
-    if 'открой' in text:
-        target = find_words_right_of('открой', text)
-
+def parse_and_work(text: str):
+    lower_text = text.lower()
+    common_list_action_opened = [action for action in list_action_opened if action in lower_text]
+    print('---------------------' + str(len(common_list_action_opened)))
+    if len(common_list_action_opened) > 0:
+        
+        target = find_words_right_of(list_action_opened, lower_text, num_words=1)
         for program in list_program:
-            if target in program:
-                subprocess.Popen(get_path_from_program(program))            
+            name, path = program
+            print(f'{name=} and {target=}')
+            subprocess.Popen(get_path_from_program(program)) if name == target else -1
+    return None          
 
 ##############################################################################
 
@@ -59,6 +84,7 @@ recognizer = sr.Recognizer()
 
 def listen_and_recognize():
     dpg.hide_item('bt_listen')
+    subprocess.Popen()
     with sr.Microphone(device_index=2) as source:
         print("Я вас слушаю...")
         dpg.set_value('txt_area', ".....................")
@@ -70,7 +96,7 @@ def listen_and_recognize():
         audio = recognizer.listen(source)
 
     try:
-        text = recognizer.recognize_google(audio, language="ru-RU") #google #sphinx
+        text = recognizer.recognize_google(audio, language="ru-RU",) #google #sphinx
         print("Вы сказали: ", text)
         dpg.set_value('txt_area', "Вы сказали: " + text)
         engine.say("Вы сказали: " + text)
@@ -80,7 +106,7 @@ def listen_and_recognize():
         #### выполняем действия ####
         ############################
 
-
+        parse_and_work(text)
 
         dpg.show_item('bt_listen')
     except sr.UnknownValueError:
