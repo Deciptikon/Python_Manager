@@ -1,6 +1,8 @@
 import pyttsx3
 import speech_recognition as sr
 import dearpygui.dearpygui as dpg
+
+import subprocess
 import pyautogui
 import time
 
@@ -15,6 +17,32 @@ time.sleep(5)
 
 # Эмулируем нажатие клавиши (например, клавиши 'A')
 #pyautogui.press('A')
+
+##############################################################################
+list_program = [['блокнот',     'notepad.exe'],
+                ['календарь',   ['start', 'ms-cald:']],
+                ['браузер',     ["start", "opera.exe"]]]
+
+def get_path_from_program(program):
+    return program[1]
+
+def find_words_right_of(target_word, input_string, num_words=1):
+    words = input_string.split()
+    index = words.index(target_word) if target_word in words else -1
+
+    if index != -1 and index + num_words < len(words):
+        return words[index + 1 : index + num_words + 1]
+    else:
+        return None
+
+def parse_and_work(text):
+    
+    if 'открой' in text:
+        target = find_words_right_of('открой', text)
+
+        for program in list_program:
+            if target in program:
+                subprocess.Popen(get_path_from_program(program))            
 
 ##############################################################################
 
