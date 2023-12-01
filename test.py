@@ -1,15 +1,15 @@
-import pyttsx3
-import speech_recognition as sr
-import dearpygui.dearpygui as dpg
+import pyttsx3                      # озвучивание текста
+import speech_recognition as sr     # распознование голоса
+import dearpygui.dearpygui as dpg   # графический интерфейс
 
-import subprocess
-import pyautogui
-import pygetwindow
-import time
+import subprocess                   # открытие программ
+import pyautogui                    # манипуляция с мышью и кнопками
+import pygetwindow                  # манипуляция с окнами
+import time                         # время
 
 #############################################################################
 
-VERSION = '0.1.2'
+VERSION = '0.1.3'
 
 ##############################################################################
 
@@ -40,11 +40,6 @@ def find_words_right_of(target_words: (list | tuple), input_string: str, num_wor
     for target_word in target_words:
         if target_word in words:
             index = words.index(target_word) 
-            print(f'{index=}')
-    print(f'{index=}')
-    print(f'{num_words=}')
-    print('index + num_words = ' + str(index + num_words))
-    print('len(words) = ' + str(len(words)))
 
     if index != -1 and index + num_words <= len(words):
         return_words = words[index + 1 : index + num_words + 1]
@@ -56,16 +51,13 @@ def find_words_right_of(target_words: (list | tuple), input_string: str, num_wor
     else:
         return None
 
-def parse_and_work(text: str):
+def parse_and_work(text: str) -> None:
     lower_text = text.lower()
     common_list_action_opened = [action for action in list_action_opened if action in lower_text]
-    print('---------------------' + str(len(common_list_action_opened)))
     if len(common_list_action_opened) > 0:
-        
         target = find_words_right_of(list_action_opened, lower_text, num_words=1)
         for program in list_program:
             name, path = program
-            print(f'{name=} and {target=}')
             subprocess.Popen(get_path_from_program(program)) if name == target else -1
     return None          
 
